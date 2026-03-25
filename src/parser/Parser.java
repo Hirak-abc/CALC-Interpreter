@@ -220,8 +220,33 @@ public class Parser {
      *   x        →  VariableNode("x")
      */
     private Expression parsePrimary() {
-        // TODO (Day 5): implement number, string, variable recognition
-        return null;   // placeholder
+
+        // NUMBER — e.g. 10, 3, 4
+        if (check(TokenType.NUMBER)) {
+            Token t = advance();                          // consume the number token
+            double value = Double.parseDouble(t.getValue());
+            return new NumberNode(value);
+        }
+
+        // STRING — e.g. "Sitare", "Hello from CALC"
+        // The Tokenizer has already stripped the surrounding quotes,
+        // so t.getValue() is just the inner text.
+        if (check(TokenType.STRING)) {
+            Token t = advance();                          // consume the string token
+            return new StringNode(t.getValue());
+        }
+
+        // IDENTIFIER — e.g. x, score, result
+        if (check(TokenType.IDENTIFIER)) {
+            Token t = advance();                          // consume the identifier token
+            return new VariableNode(t.getName());
+        }
+
+        // Nothing matched — the source code has something unexpected here.
+        throw new RuntimeException(
+            "Expected a number, string, or variable but got '" +
+            peek().getValue() + "' on line " + peek().getLine()
+        );
     }
 
     // ════════════════════════════════════════════════════════════════════════
