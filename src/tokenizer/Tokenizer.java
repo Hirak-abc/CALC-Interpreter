@@ -19,11 +19,35 @@ public class Tokenizer {
         while (pos < source.length()) {
             char current = source.charAt(pos);
 
-            if (Character.isDigit(current)) {
+            // Multi-character tokens (check first)
+            if (current == ':' && peek() == '=') {
+                tokens.add(new Token(TokenType.ASSIGN, ":=", line));
+                pos += 2;
+            } else if (current == '>' && peek() == '>') {
+                tokens.add(new Token(TokenType.PRINT, ">>", line));
+                pos += 2;
+            } else if (current == '=' && peek() == '>') {
+                tokens.add(new Token(TokenType.ARROW, "=>", line));
+                pos += 2;
+            }
+
+            // Numbers
+            else if (Character.isDigit(current)) {
                 tokens.add(readNumber());
-            } else if (Character.isLetter(current)) {
+            }
+
+            // Identifiers
+            else if (Character.isLetter(current)) {
                 tokens.add(readIdentifier());
-            } else if (current == '+') {
+            }
+
+            // Strings
+            else if (current == '"') {
+                tokens.add(readString());
+            }
+
+            // Operators
+            else if (current == '+') {
                 tokens.add(new Token(TokenType.PLUS, "+", line));
                 pos++;
             } else if (current == '-') {
@@ -35,14 +59,41 @@ public class Tokenizer {
             } else if (current == '/') {
                 tokens.add(new Token(TokenType.DIVIDE, "/", line));
                 pos++;
-            } else if (current == '\n') {
+            }
+
+            // Comparison
+            else if (current == '>') {
+                tokens.add(new Token(TokenType.GT, ">", line));
+                pos++;
+            } else if (current == '<') {
+                tokens.add(new Token(TokenType.LT, "<", line));
+                pos++;
+            }
+
+            // Control symbols
+            else if (current == '?') {
+                tokens.add(new Token(TokenType.IF, "?", line));
+                pos++;
+            } else if (current == '@') {
+                tokens.add(new Token(TokenType.LOOP, "@", line));
+                pos++;
+            }
+
+            // Newline
+            else if (current == '\n') {
                 tokens.add(new Token(TokenType.NEWLINE, "\\n", line));
                 line++;
                 pos++;
-            } else if (Character.isWhitespace(current)) {
+            }
+
+            // Whitespace
+            else if (Character.isWhitespace(current)) {
                 pos++;
-            } else {
-                pos++; // skip unknown for now
+            }
+
+            // Error
+            else {
+                throw new RuntimeException("Unexpected character: " + current + " at line " + line);
             }
         }
 
@@ -53,7 +104,8 @@ public class Tokenizer {
     private Token readNumber() {
         int start = pos;
 
-        while (pos < source.length() && Character.isDigit(source.charAt(pos))) {
+        while (pos < source.length() &&
+                (Character.isDigit(source.charAt(pos)) || source.charAt(pos) == '.')) {
             pos++;
         }
 
@@ -64,11 +116,31 @@ public class Tokenizer {
     private Token readIdentifier() {
         int start = pos;
 
-        while (pos < source.length() && Character.isLetterOrDigit(source.charAt(pos))) {
+        while (pos < source.length() &&
+                Character.isLetterOrDigit(source.charAt(pos))) {
             pos++;
         }
 
         String value = source.substring(start, pos);
         return new Token(TokenType.IDENTIFIER, value, line);
+    }
+
+    private Token readString() {
+        pos++; // skip opening "
+        int start = pos;
+
+        while (pos < source.length() && source.charAt(pos) != '"') {
+            pos++;
+        }
+
+        String value = source.substring(start, pos);
+        pos++; // skip closing "
+
+        return new Token(TokenType.STRING, value, line);
+    }
+
+    private char peek() {
+        if (pos + 1 >= source.length()) return '\0';
+        return source.charAt(pos + 1);
     }
 }
