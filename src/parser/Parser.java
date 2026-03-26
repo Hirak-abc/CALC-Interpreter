@@ -204,10 +204,21 @@ public class Parser {
      *   sees *
      *   parsePrimary() gives 2
      *   returns BinaryOpNode(y, "*", 2)
+     *
+     * The while loop handles chaining:  a * b / c
+     *   → BinaryOpNode(BinaryOpNode(a, "*", b), "/", c)
      */
     private Expression parseTerm() {
-        // TODO (Day 6): implement * and /
-        return parsePrimary();   // placeholder — delegates down for now
+        Expression left = parsePrimary();   // get the left operand first
+
+        // keep consuming * or / as long as they appear
+        while (check(TokenType.MULTIPLY) || check(TokenType.DIVIDE)) {
+            String operator = advance().getValue();     // consume * or /
+            Expression right = parsePrimary();          // get the right operand
+            left = new BinaryOpNode(left, operator, right); // wrap into a node
+        }
+
+        return left;
     }
 
     /**
