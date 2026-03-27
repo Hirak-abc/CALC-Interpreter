@@ -187,12 +187,31 @@ public class Parser {
      * Example:  x + y * 2
      *   parseTerm() gives x
      *   sees +
-     *   parseTerm() gives the sub-tree (y * 2)
+     *   parseTerm() gives the sub-tree BinaryOpNode(y, "*", 2)
      *   returns BinaryOpNode(x, "+", BinaryOpNode(y, "*", 2))
+     *
+     * Example:  score > 50
+     *   parseTerm() gives VariableNode("score")
+     *   sees >
+     *   parseTerm() gives NumberNode(50)
+     *   returns BinaryOpNode(VariableNode("score"), ">", NumberNode(50))
+     *
+     * The while loop handles chaining:  a + b - c
+     *   → BinaryOpNode(BinaryOpNode(a, "+", b), "-", c)
      */
     private Expression parseExpression() {
-        // TODO (Day 7): implement + - and comparisons > <
-        return parseTerm();   // placeholder — delegates down for now
+        Expression left = parseTerm();      // get the left operand first
+
+        // keep consuming +, -, >, < as long as they appear
+        while (check(TokenType.PLUS) || check(TokenType.MINUS)
+            || check(TokenType.GT)   || check(TokenType.LT)) {
+
+            String operator = advance().getValue();     // consume the operator
+            Expression right = parseTerm();             // get the right operand
+            left = new BinaryOpNode(left, operator, right); // wrap into a node
+        }
+
+        return left;
     }
 
     /**
