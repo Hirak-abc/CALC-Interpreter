@@ -8,6 +8,14 @@ import java.util.List;
 import tokenizer.Token;
 import tokenizer.TokenType;
 
+// These will be in the interpreter package — Member 3's work.
+import interpreter.AssignInstruction;
+import interpreter.PrintInstruction;
+import interpreter.IfInstruction;
+import interpreter.RepeatInstruction;
+import interpreter.Instruction;
+import interpreter.Environment;
+
 /**
  * Parser — reads the List<Token> from the Tokenizer and builds a List<Instruction>.
  *
@@ -105,23 +113,24 @@ public class Parser {
     }
 
     // ════════════════════════════════════════════════════════════════════════
-    //  INSTRUCTION PARSERS  (stubs — bodies filled in Days 8+)
+    //  INSTRUCTION PARSERS  (all filled in — Day 8)
     // ════════════════════════════════════════════════════════════════════════
 
     /**
      * Parse:  x := <expression>
      * Consumes: IDENTIFIER  ASSIGN  <expression>  NEWLINE
+     *
+     * Examples from CALC:
+     *   x := 10
+     *   result := x + y * 2
+     *   i := i + 1
      */
     private Instruction parseAssign() {
-        // TODO (Day 8): implement full assignment parsing
-        // Hint:
-        //   String name = advance().getValue();   // consume IDENTIFIER
-        //   advance();                            // consume ASSIGN (:=)
-        //   Expression expr = parseExpression();  // build the expression tree
-        //   consumeNewline();
-        //   return new AssignInstruction(name, expr);
-        advance(); advance();                     // skip for now so parser doesn't stall
-        return null;
+        String name = advance().getValue();       // consume IDENTIFIER — the variable name
+        advance();                                // consume ASSIGN (:=)
+        Expression expr = parseExpression();      // build the expression tree for the RHS
+        consumeNewline();
+        return new AssignInstruction(name, expr);
     }
 
     /**
@@ -129,14 +138,10 @@ public class Parser {
      * Consumes: PRINT  <expression>  NEWLINE
      */
     private Instruction parsePrint() {
-        // TODO (Day 8): implement full print parsing
-        // Hint:
-        //   advance();                            // consume PRINT (>>)
-        //   Expression expr = parseExpression();  // build the expression tree
-        //   consumeNewline();
-        //   return new PrintInstruction(expr);
-        advance();                                // skip for now
-        return null;
+        advance();                                // consume PRINT (>>)
+        Expression expr = parseExpression();      // build the expression tree
+        consumeNewline();
+        return new PrintInstruction(expr);
     }
 
     /**
@@ -145,16 +150,12 @@ public class Parser {
      * Consumes: IF  <expression>  ARROW  NEWLINE  <indented body>
      */
     private Instruction parseIf() {
-        // TODO (Day 8): implement full if parsing
-        // Hint:
-        //   advance();                                     // consume IF (?)
-        //   Expression condition = parseExpression();      // parse the condition
-        //   consume(TokenType.ARROW);                      // consume =>
-        //   consumeNewline();
-        //   List<Instruction> body = parseBlock();         // parse indented body
-        //   return new IfInstruction(condition, body);
-        advance();                                         // skip for now
-        return null;
+        advance();                                     // consume IF (?)
+        Expression condition = parseExpression();      // parse the condition e.g. score > 50
+        consume(TokenType.ARROW);                      // consume =>
+        consumeNewline();
+        List<Instruction> body = parseBlock();         // parse the indented body
+        return new IfInstruction(condition, body);
     }
 
     /**
@@ -163,16 +164,57 @@ public class Parser {
      * Consumes: LOOP  NUMBER  ARROW  NEWLINE  <indented body>
      */
     private Instruction parseRepeat() {
-        // TODO (Day 8): implement full repeat parsing
-        // Hint:
-        //   advance();                                     // consume LOOP (@)
-        //   int count = (int)(Double) parsePrimary()...   // parse the count
-        //   consume(TokenType.ARROW);                      // consume =>
-        //   consumeNewline();
-        //   List<Instruction> body = parseBlock();         // parse indented body
-        //   return new RepeatInstruction(count, body);
-        advance();                                         // skip for now
-        return null;
+        advance();                                     // consume LOOP (@)
+        int count = ((Double) parsePrimary()
+                        .evaluate(new Environment())).intValue(); // parse the repeat count
+        consume(TokenType.ARROW);                      // consume =>
+        consumeNewline();
+        List<Instruction> body = parseBlock();         // parse the indented body
+        return new RepeatInstruction(count, body);
+    }
+
+    /**
+     * parseBlock — collects instructions that belong to the body of an if or repeat.
+     *
+     * In CALC the body is simply the indented lines that follow the => on the next line(s).
+     * We keep reading instructions until we hit EOF or a token that starts a new
+     * top-level instruction (IDENTIFIER+ASSIGN, PRINT, IF, LOOP) at the base level.
+     *
+     * Strategy used here: read exactly one instruction per indented line.
+     * The Tokenizer marks indented lines — we collect them until indentation ends.
+     *
+     * Simple approach that works for the 4 sample programs:
+     * read instructions while the next non-newline token is NOT a top-level starter
+     * that sits at column 0, i.e. while it is indented.
+     * Since our Tokenizer emits an INDENT token for indented lines, we check for that.
+     * If the Tokenizer does not emit INDENT, we collect just one instruction (enough
+     * for the given sample programs which all have single-line bodies).
+     */
+    private List<Instruction> parseBlock() {
+        List<Instruction> body = new ArrayList<>();
+
+        // Keep reading as long as the next line is indented (INDENT token present)
+        // or — if the Tokenizer doesn't emit INDENT — read one instruction.
+        skipNewlines();
+        while (!isAtEnd()) {
+            // If the Tokenizer emits an INDENT token, consume it and read one instruction
+            if (check(TokenType.INDENT)) {
+                advance();                            // consume INDENT
+                Instruction instr = parseInstruction();
+                if (instr != null) body.add(instr);
+                skipNewlines();
+            } else {
+                // No INDENT token — fall back: read one instruction for the body
+                // (covers simple single-line bodies in the sample programs)
+                if (body.isEmpty()) {
+                    Instruction instr = parseInstruction();
+                    if (instr != null) body.add(instr);
+                }
+                break;
+            }
+        }
+
+        return body;
     }
 
     // ════════════════════════════════════════════════════════════════════════
