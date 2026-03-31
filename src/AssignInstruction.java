@@ -1,6 +1,6 @@
 package src;
 
-import java.beans.Expression;
+import src.Expression;  
 
 public class AssignInstruction implements Instruction  {
     private String name;       // variable name  e.g. "result"
