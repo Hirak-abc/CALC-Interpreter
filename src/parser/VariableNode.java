@@ -1,5 +1,7 @@
 package parser;
 
+import interpreter.Environment;
+
 /**
  * VariableNode — represents a variable reference in CALC source code.
  *
