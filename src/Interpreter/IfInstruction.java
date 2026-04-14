@@ -1,7 +1,8 @@
-package src.Interpreter;
+package interpreter;
 
 import java.util.List;
-import src.Expression; 
+import parser.Expression;
+
 
 public class IfInstruction implements Instruction {
 
