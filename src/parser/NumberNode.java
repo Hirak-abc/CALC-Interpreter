@@ -1,5 +1,7 @@
 package parser;
 
+import interpreter.Environment;
+
 /**
  * NumberNode — represents a numeric literal in CALC source code.
  *

@@ -1,5 +1,7 @@
 package parser;
 
+import interpreter.Environment;
+
 /**
  * StringNode — represents a string literal in CALC source code.
  *

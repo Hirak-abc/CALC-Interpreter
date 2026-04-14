@@ -1,5 +1,7 @@
 package parser;
 
+import interpreter.Environment;
+
 /**
  * Expression interface — every node in the expression tree implements this.
  *

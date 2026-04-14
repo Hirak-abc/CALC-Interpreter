@@ -311,7 +311,7 @@ public class Parser {
         // IDENTIFIER — e.g. x, score, result
         if (check(TokenType.IDENTIFIER)) {
             Token t = advance();                          // consume the identifier token
-            return new VariableNode(t.getName());
+            return new VariableNode(t.getValue());
         }
 
         // Nothing matched — the source code has something unexpected here.

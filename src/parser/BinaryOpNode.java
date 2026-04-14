@@ -1,5 +1,7 @@
 package parser;
 
+import interpreter.Environment;
+
 /**
  * BinaryOpNode — represents an operation between two expressions.
  *
