@@ -1,8 +1,8 @@
 
 
-package src.Interpreter;
-import src.Expression;
-import src.Interpreter.Interpreter.Environment;  
+package interpreter;
+
+import parser.Expression;
 
 public class PrintInstruction implements Instruction {
 
