@@ -1,6 +1,6 @@
-package src.Interpreter;
+package interpreter;
 
-import src.Expression;  
+import parser.Expression;  
 
 public class AssignInstruction implements Instruction  {
     private String name;       // variable name  e.g. "result"
