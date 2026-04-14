@@ -1,8 +1,6 @@
-package src.Interpreter;
+package interpreter;
 
 import java.util.List;
-
-import src.Interpreter.Interpreter.Environment;
 
 public class RepeatInstruction implements Instruction {
 
