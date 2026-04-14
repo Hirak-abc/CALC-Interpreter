@@ -19,6 +19,7 @@ public enum TokenType {
     GT,         // >
     LT,         // <
 
+    INDENT,
     NEWLINE,
     EOF
 }
