@@ -158,8 +158,7 @@ javac -encoding UTF-8 -d bin (Get-ChildItem -Recurse -Filter "*.java" src | % { 
 
 **Run a `.calc` program:**
 ```bash
-java -cp bin interpreter.Interpreter programs/program1.calc
-```
+java -cp bin interpreter.Interpreter programs/program1.calc```
 
 ---
 
