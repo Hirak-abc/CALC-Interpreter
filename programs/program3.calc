@@ -1,0 +1,3 @@
+score := 85
+? score > 50 =>
+    >> "Pass"
