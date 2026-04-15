@@ -154,12 +154,11 @@ Output:
 
 **Compile all files from the project root:**
 ```bash
-javac -d out src/tokenizer/*.java src/interpreter/*.java src/parser/*.java
-```
+javac -encoding UTF-8 -d bin (Get-ChildItem -Recurse -Filter "*.java" src | % { $_.FullName })```
 
 **Run a `.calc` program:**
 ```bash
-java -cp out interpreter.Interpreter programs/program1.calc
+java -cp bin interpreter.Interpreter programs/program1.calc
 ```
 
 ---
