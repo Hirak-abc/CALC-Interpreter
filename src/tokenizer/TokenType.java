@@ -19,7 +19,7 @@ public enum TokenType {
     GT,         // >
     LT,         // <
 
-    INDENT,
+    INDENT,     // leading spaces on a line (optional; body parsing)
     NEWLINE,
     EOF
 }
